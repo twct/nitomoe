@@ -1,10 +1,6 @@
-use std::env;
+use crate::define_env;
 
-use once_cell::sync::Lazy;
-
-pub static DATABASE_URL: Lazy<&'static str> = Lazy::new(|| {
-    static VALUE: Lazy<String> = Lazy::new(|| {
-        env::var("DATABASE_URL").unwrap_or_else(|_| "postgres://localhost/nitomoe".to_string())
-    });
-    &VALUE
-});
+define_env!(
+    DATABASE_URL,
+    "postgres://postgres:postgres@localhost/nitomoe"
+);

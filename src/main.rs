@@ -4,6 +4,7 @@ use dotenv::dotenv;
 
 mod config;
 mod env;
+mod macros;
 
 async fn default_service() -> impl Responder {
     "Hello"
