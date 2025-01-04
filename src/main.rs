@@ -5,6 +5,9 @@ use dotenv::dotenv;
 mod config;
 mod env;
 mod macros;
+mod models;
+mod repos;
+mod schema;
 
 async fn default_service() -> impl Responder {
     "Hello"
