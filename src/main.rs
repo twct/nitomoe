@@ -1,5 +1,7 @@
 use actix_files as fs;
 use actix_web::{get, middleware::Logger, web, App, HttpServer, Responder};
+use args::{process_args, Args};
+use clap::Parser;
 use config::database::establish_db_connection;
 use dotenv::dotenv;
 use views::{
@@ -7,6 +9,7 @@ use views::{
     render_view,
 };
 
+mod args;
 mod config;
 mod env;
 mod macros;
@@ -29,11 +32,7 @@ async fn admin_login() -> impl Responder {
     render_view(AdminAuth {})
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    dotenv().ok();
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
-
+async fn run_server() -> std::io::Result<()> {
     let db_connection = web::Data::new(establish_db_connection(&env::DATABASE_URL));
 
     HttpServer::new(move || {
@@ -47,14 +46,23 @@ async fn main() -> std::io::Result<()> {
                     .show_files_listing()
                     .use_last_modified(true),
             )
-            .service(
-                fs::Files::new("/img", "./assets/img")
-                    .show_files_listing()
-                    .use_last_modified(true),
-            )
+            .service(fs::Files::new("/img", "./assets/img"))
             .default_service(web::to(default_service))
     })
     .bind("0.0.0.0:4000")?
     .run()
     .await
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    dotenv().ok();
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+
+    if std::env::args().len() > 1 {
+        let args = Args::parse();
+        process_args(args).await
+    } else {
+        run_server().await
+    }
 }
