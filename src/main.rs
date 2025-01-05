@@ -1,9 +1,11 @@
 use actix_files as fs;
-use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
-use askama::Template;
+use actix_web::{get, middleware::Logger, web, App, HttpServer, Responder};
 use config::database::establish_db_connection;
 use dotenv::dotenv;
-use views::admin_view::AdminDashboard;
+use views::{
+    admin_view::{AdminAuth, AdminDashboard},
+    render_view,
+};
 
 mod config;
 mod env;
@@ -19,9 +21,12 @@ async fn default_service() -> impl Responder {
 
 #[get("/admin")]
 async fn admin_dashboard() -> impl Responder {
-    let context = AdminDashboard {};
-    let rendered = context.render().unwrap();
-    HttpResponse::Ok().content_type("text/html").body(rendered)
+    render_view(AdminDashboard {})
+}
+
+#[get("/admin/auth")]
+async fn admin_login() -> impl Responder {
+    render_view(AdminAuth {})
 }
 
 #[actix_web::main]
@@ -36,7 +41,17 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::new("%a %{User-Agent}i"))
             .app_data(db_connection.clone())
             .service(admin_dashboard)
-            .service(fs::Files::new("/css", "./static/css").show_files_listing())
+            .service(admin_login)
+            .service(
+                fs::Files::new("/css", "./static/css")
+                    .show_files_listing()
+                    .use_last_modified(true),
+            )
+            .service(
+                fs::Files::new("/img", "./assets/img")
+                    .show_files_listing()
+                    .use_last_modified(true),
+            )
             .default_service(web::to(default_service))
     })
     .bind("0.0.0.0:4000")?

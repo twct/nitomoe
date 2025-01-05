@@ -1309,6 +1309,7 @@ dependencies = [
  "dotenv",
  "env_logger",
  "grass",
+ "log",
  "once_cell",
  "walkdir",
 ]

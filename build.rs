@@ -47,7 +47,9 @@ fn compile_sass(sass_path: &Path, css_path: &Path) -> io::Result<()> {
     let mut file = fs::File::open(sass_path)?;
     file.read_to_string(&mut sass_content)?;
 
-    let options = grass::Options::default().style(OutputStyle::Compressed);
+    let options = grass::Options::default()
+        .style(OutputStyle::Compressed)
+        .load_path(sass_path.parent().unwrap());
 
     match from_string(&sass_content, &options) {
         Ok(css) => {
