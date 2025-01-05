@@ -37,6 +37,7 @@ async fn admin_create_user() -> std::io::Result<()> {
     std::io::stdout().flush()?;
     let mut username = String::new();
     std::io::stdin().read_line(&mut username)?;
+    let username = username.trim_end();
 
     let password = prompt_password("Password: ").unwrap();
 
