@@ -33,16 +33,21 @@ pub async fn process_args(args: Args) -> std::io::Result<()> {
 }
 
 async fn admin_create_user() -> std::io::Result<()> {
-    print!("Username: ");
-    std::io::stdout().flush()?;
-    let mut username = String::new();
-    std::io::stdin().read_line(&mut username)?;
-    let username = username.trim_end();
-
-    let password = prompt_password("Password: ").unwrap();
+    let username = prompt_input("Username: ")?;
+    let password = prompt_password("Password: ")?;
 
     log::info!("Username = {}, password = <SECURELY_ENTERED>", username);
     log::info!("{}", password);
 
     Ok(())
+}
+
+fn prompt_input<S: Into<String>>(prompt: S) -> std::io::Result<String> {
+    print!("{}", prompt.into());
+    std::io::stdout().flush()?;
+
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input)?;
+
+    Ok(input.trim_end().to_string())
 }
